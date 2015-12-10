@@ -52,7 +52,7 @@ If you are using a preset, it probably already includes `babel-plugin-transform-
 
     {
         "presets": ["es2015"],
-        "plugins": "babel-plugin-transform-es2015-modules-commonjs-simple"
+        "plugins": "transform-es2015-modules-commonjs-simple"
     }
 
 This does not actually override the existing plugin - they both run. But, Babel runs the plugins from your local configuration before presets, so the module will already be transformed, meaning that there will be nothing to do when the module transform from the preset runs.
