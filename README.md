@@ -61,9 +61,13 @@ So this may not be perfectly efficient - but it should be safe. The only other a
 
 ## Installation
 
+Probably...
+
 ```sh
-$ npm install babel-plugin-transform-es2015-modules-commonjs-simple
+$ npm install babel-plugin-transform-es2015-modules-commonjs-simple --save-dev
 ```
+
+.. like any other babel plugin or module.
 
 ## Credits
 
