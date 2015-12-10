@@ -1,0 +1,53 @@
+{
+    "parser": "babel-eslint",
+    "env": {
+        "node": true
+    },
+    rules: {
+        // general 
+
+        "strict": [2, "global"],
+        "one-var": [2, "never"],
+        "max-len": [1, 150, 4, {"ignoreComments": true, "ignoreUrls": true}],        
+
+        // code errors
+        "vars-on-top": 0,
+        "consistent-return": 0,
+        "no-with": 2,
+        "no-undef": 2,
+        "no-new-object": 2,
+        "no-array-constructor": 2,
+        "no-shadow-restricted-names": 1,
+        "no-redeclare": 2,
+        "eqeqeq": 2,
+        "no-octal": 2,
+        "eol-last": 2,
+        "no-dupe-args": 2,
+        "no-unexpected-multiline": 2,
+        "valid-typeof": 2,
+        "valid-jsdoc": 2,
+        "no-sparse-arrays": 2,
+        "block-scoped-var": 2,
+        "new-parens": 2,
+        "no-eval": 2,
+        "no-unneeded-ternary": 2,
+        "no-new-wrappers": 2,
+        "no-fallthrough": 2,
+        "no-lone-blocks": 2,
+        "no-cond-assign": 2,
+
+        // code warnings
+
+        "no-nested-ternary": 1,
+        "consistent-this": [1, "that"],
+        "radix": 1,
+        "camelcase": 1,
+        "new-cap": 1,
+        "dot-location": [1, "property"],
+
+        "no-unused-vars": 1                 // could be reasons such as "catch" and placeholders
+    },
+    "ecmaFeatures": {
+        "modules": true
+    }
+}
