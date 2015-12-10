@@ -65,3 +65,6 @@ So this may not be perfectly efficient - but it should be safe. The only other a
 $ npm install babel-plugin-transform-es2015-modules-commonjs-simple
 ```
 
+## Credits
+
+This code is almost entirely copied from the babel [source babel-plugin-transform-es2015-commonjs](https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-es2015-modules-commonjs).
