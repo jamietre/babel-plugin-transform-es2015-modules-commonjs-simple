@@ -64,10 +64,10 @@ So this may not be perfectly efficient - but it should be safe. The only other a
 Probably...
 
 ```sh
-$ npm install babel-plugin-transform-es2015-modules-commonjs-simple --save-dev
+$ npm install https://github.com/jamietre/babel-plugin-transform-es2015-modules-commonjs-simple.git --save-dev
 ```
 
-.. like any other babel plugin or module.
+.. I will publish an npm module when it's been tested for a little longer!
 
 ## Credits
 
