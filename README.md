@@ -59,8 +59,6 @@ This does not actually override the existing plugin - they both run. But, Babel 
 
 So this may not be perfectly efficient - but it should be safe. The only other alternative would be to create your own preset that excludes the CommonJS transformer.
 
-## ... this is the 
-
 ## Installation
 
 ```sh
