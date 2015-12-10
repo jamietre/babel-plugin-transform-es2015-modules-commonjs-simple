@@ -1,4 +1,4 @@
-# babel-plugin-transform-es2015-modules-commonjs
+# babel-plugin-transform-es2015-modules-commonjs-simple
 
 ## About this fork
 
@@ -26,6 +26,18 @@ This feature may not be useful to some people, especially given that it didn't e
     console.log(foo.text)
 
 
+## Using it
+
+If you are using a preset, it probably already includes `babel-plugin-transform-es2015-commonjs`. You can most likely get away with just adding this plugin to your config:
+
+    {
+        "presets": ["es2015"],
+        "plugins": "babel-plugin-transform-es2015-modules-commonjs-simple"
+    }
+
+This does not actually override the existing plugin - they both run. But, Babel runs the plugins from your local configuration before presets, so the module will already be transformed, meaning that there will be nothing to do when the module transform from the preset runs.
+
+So this may not be perfectly efficient - but it should be safe. The only other alternative would be to create your own preset that excludes the CommonJS transformer.
 
 
 ## Installation
