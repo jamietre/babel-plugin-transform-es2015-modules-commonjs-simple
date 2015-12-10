@@ -310,8 +310,6 @@ debugger;
             let specifiers = imports[source];
             if (specifiers.length) {
               
-
-              //let wildcard;
               let uid = addRequire(source);
               
               for (let i = 0; i < specifiers.length; i++) {
@@ -320,7 +318,6 @@ debugger;
                   topNodes.push(t.variableDeclaration("var", [
                     t.variableDeclarator(specifier.local, t.callExpression(this.addHelper("interopRequireWildcard"), [uid]))
                   ]));
-                  //wildcard = specifier.local;
                 } else if (t.isImportDefaultSpecifier(specifier)) {                  
                   specifiers[i] = t.importSpecifier(specifier.local, t.identifier("default"));
                 } 
@@ -330,9 +327,6 @@ debugger;
                 if (t.isImportSpecifier(specifier)) {
                   let target = uid;
                   if (specifier.imported.name === "default") {
-                    // if (wildcard) {
-                    //   target = wildcard;
-                    // } else {
                       target = specifier.local;
                       
                       let requireDefault = this.addHelper("interopRequireDefault");
@@ -341,7 +335,6 @@ debugger;
                       topNodes.push(t.variableDeclaration("var", [
                         t.variableDeclarator(target, declaration)
                       ]));
-                    // }
                   } else {
                     // is a named import
                     
