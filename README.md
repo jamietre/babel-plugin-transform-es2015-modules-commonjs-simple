@@ -11,7 +11,7 @@ In order to permit this interop with the ES2015 feature set, when compiling ES21
     import foo from 'bar';
     console.log(foo.text)
 
-is transformed to 
+is transformed to  
 
     var _foo = require('bar');
     var _foo2 = defaultExportInterop(_foo);
