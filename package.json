@@ -6,7 +6,8 @@
   "license": "MIT",
   "main": "lib/index.js",
   "scripts": {
-    "build": "babel src/index.js >lib/index.js",
+    "prepublish": "npm run build",
+    "build": "babel src --out-dir lib",
     "lint": "eslint src",
     "pretest": "npm run lint",
     "test": "mocha --opts test/mocha.opts test/index.js",
