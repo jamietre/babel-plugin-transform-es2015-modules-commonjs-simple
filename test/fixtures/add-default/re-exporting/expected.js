@@ -9,7 +9,7 @@ var _foo = require("foo");
 Object.defineProperty(exports, "default", {
   enumerable: true,
   get: function () {
-    return _foo.default;
+    return babelHelpers.interopRequireDefault(_foo).default;
   }
 });
 module.exports = exports['default'];

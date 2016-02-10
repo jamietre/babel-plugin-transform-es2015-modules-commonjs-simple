@@ -165,19 +165,24 @@ export default function () {
               type: "Identifier"
             };
           }
-           
-          function addRequire(source, uid) {
-
+          
+          function addRequire(source, blockHoist) {
             let cached = requires[source];
             if (cached) return cached;
 
-            let ref = uid ? 
-              getIdentifier(uid) :
-              path.scope.generateUidIdentifier(basename(source, extname(source)));
+            let ref = path.scope.generateUidIdentifier(basename(source, extname(source)));
 
-            topNodes.push(t.variableDeclaration("var", [
-              t.variableDeclarator(ref, buildRequire(t.stringLiteral(source)).expression)
-            ]));
+            let varDecl = t.variableDeclaration("var", [
+              t.variableDeclarator(ref, buildRequire(
+                t.stringLiteral(source)
+              ).expression)
+            ]);
+
+            if (typeof blockHoist === "number" && blockHoist > 0) {
+              varDecl._blockHoist = blockHoist;
+            }
+
+            topNodes.push(varDecl);
 
             return requires[source] = ref;
           }
@@ -210,7 +215,22 @@ export default function () {
 
             if (path.isImportDeclaration()) {
               hasImports = true;
-              addTo(imports, path.node.source.value, path.node.specifiers);
+              let key = path.node.source.value;
+              let importsEntry = imports[key] || {
+                 specifiers: [],
+                 maxBlockHoist: 0
+              };
+ 
+              importsEntry.specifiers.push(...path.node.specifiers);
+ 
+              if (typeof path.node._blockHoist === "number") {
+                importsEntry.maxBlockHoist = Math.max(
+                  path.node._blockHoist,
+                  importsEntry.maxBlockHoist
+                );
+              }
+
+              imports[key] = importsEntry;
               path.remove();
             } else if (path.isExportDefaultDeclaration()) {
               hasDefaultExport = true;
@@ -290,7 +310,7 @@ export default function () {
                 let nodes = [];
                 let source = path.node.source
                 if (source) {
-                  let ref = addRequire(source.value);
+                  let ref = addRequire(source.value, path.node._blockHoist);
 
                   for (let specifier of specifiers) {
                     if (specifier.isExportNamespaceSpecifier()) {
@@ -299,8 +319,14 @@ export default function () {
                       // todo
                     } else if (specifier.isExportSpecifier()) {
                       checkExportType(specifier.node.exported.name);
-                      topNodes.push(buildExportsFrom(t.stringLiteral(specifier.node.exported.name), 
+
+                      if (specifier.node.local.name === "default") {
+                        topNodes.push(buildExportsFrom(t.stringLiteral(specifier.node.exported.name), 
+                          t.memberExpression(t.callExpression(this.addHelper("interopRequireDefault"), [ref]), specifier.node.local)));
+                      } else {
+                        topNodes.push(buildExportsFrom(t.stringLiteral(specifier.node.exported.name), 
                           t.memberExpression(ref, specifier.node.local)));
+                      }
 
                       nonHoistedExportNames[specifier.node.exported.name] = true;
                     }
@@ -321,24 +347,35 @@ export default function () {
               hasNamedExport = true;
               topNodes.push(buildExportAll({
                 KEY: path.scope.generateUidIdentifier("key"),
-                OBJECT: addRequire(path.node.source.value)
+                OBJECT: addRequire(path.node.source.value, path.node._blockHoist)
               }));
               path.remove();
             }
           }
 
           for (let source in imports) {
-            let specifiers = imports[source];
+            let {specifiers, maxBlockHoist} = imports[source];
             if (specifiers.length) {
               
-              let uid = addRequire(source);
+              let uid = addRequire(source, maxBlockHoist);
               
               for (let i = 0; i < specifiers.length; i++) {
                 let specifier = specifiers[i];
+                
                 if (t.isImportNamespaceSpecifier(specifier)) {
-                  topNodes.push(t.variableDeclaration("var", [
-                    t.variableDeclarator(specifier.local, t.callExpression(this.addHelper("interopRequireWildcard"), [uid]))
-                  ]));
+                  if (strict) {
+                    remaps[specifier.local.name] = uid;
+                  } else {
+                    const varDecl = t.variableDeclaration("var", [
+                      t.variableDeclarator(specifier.local, t.callExpression(this.addHelper("interopRequireWildcard"), [uid]))
+                    ]);
+
+                    if (maxBlockHoist > 0) {
+                      varDecl._blockHoist = maxBlockHoist;
+                    }
+
+                    topNodes.push(varDecl);
+                  }
                 } else if (t.isImportDefaultSpecifier(specifier)) {                  
                   specifiers[i] = t.importSpecifier(specifier.local, t.identifier("default"));
                 } 
@@ -360,13 +397,23 @@ export default function () {
                     // is a named import
                     
                     target = specifier.local;
-                    topNodes.push(t.variableDeclaration("var", [
-                      t.variableDeclarator(target, t.memberExpression(uid, specifier.imported))
-                    ]));
+
+                    const varDecl = t.variableDeclaration("var", [
+                      t.variableDeclarator(
+                        target,
+                        t.memberExpression(uid, specifier.imported)
+                      )
+                    ]);
+
+                    if (maxBlockHoist > 0) {
+                      varDecl._blockHoist = maxBlockHoist;
+                    }
+
+                    topNodes.push(varDecl);
                   }
                   
                   if (specifier.local.name !== target.name) {
-                    remaps[specifier.local.name] = t.memberExpression(target, specifier.imported);
+                    remaps[specifier.local.name] = t.memberExpression(target, t.cloneWithoutLoc(specifier.imported));
                   }
                 }
               }
@@ -383,14 +430,21 @@ export default function () {
               hoistedExportsNode = buildExportsAssignment(t.identifier(name), hoistedExportsNode).expression;
             }
 
-            topNodes.unshift(t.expressionStatement(hoistedExportsNode));
+            const node = t.expressionStatement(hoistedExportsNode);
+            node._blockHoist = 3;
+ 
+            topNodes.unshift(node);
           }
 
           // add __esModule declaration if this file has any exports
           if (hasExports && !strict) {
             let buildTemplate = buildExportsModuleDeclaration;
             if (this.opts.loose) buildTemplate = buildLooseExportsModuleDeclaration;
-            topNodes.unshift(buildTemplate());
+            
+            const declar = buildTemplate();
+            declar._blockHoist = 3;
+           
+            topNodes.unshift(declar);
           }
 
           /*
