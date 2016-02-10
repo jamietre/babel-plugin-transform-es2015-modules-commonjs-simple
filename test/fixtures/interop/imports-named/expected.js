@@ -9,6 +9,7 @@ var baz2 = _foo.bar;
 var baz3 = _foo.bar;
 var xyz = _foo.xyz;
 
+
 bar;
 bar2;
 baz;

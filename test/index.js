@@ -41,7 +41,7 @@ if (testPath) {
   }
 }
 
-var textEncoding =  { encoding: 'utf8' };
+var textEncoding =  'utf8';
 
 function testGroup(testRoot, testGroup) {
   var fixtureRoot = path.join(testRoot, testGroup);
@@ -56,6 +56,10 @@ function testGroup(testRoot, testGroup) {
     test(fixtureRoot, folder, opts);
   });
   
+}
+
+function normalizeEndings(text) {
+  return text.replace(/\r\n/g, "\n");
 }
 
 function test(fixtureRoot, fixtureName, options) {
@@ -85,7 +89,7 @@ function test(fixtureRoot, fixtureName, options) {
     
     var expected = fs.readFileSync(expectedPath, textEncoding);
 
-    assert.equal(actual, expected);
+    assert.equal(normalizeEndings(actual), normalizeEndings(expected));
   });
 }
 

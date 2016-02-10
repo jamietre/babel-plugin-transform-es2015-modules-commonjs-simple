@@ -52,12 +52,36 @@ If you are using a preset, it probably already includes `babel-plugin-transform-
 
     {
         "presets": ["es2015"],
-        "plugins": "transform-es2015-modules-commonjs-simple"
+        "plugins": ["transform-es2015-modules-commonjs-simple"]
     }
 
 This does not actually override the existing plugin - they both run. But, Babel runs the plugins from your local configuration before presets, so the module will already be transformed, meaning that there will be nothing to do when the module transform from the preset runs.
 
 So this may not be perfectly efficient - but it should be safe. The only other alternative would be to create your own preset that excludes the CommonJS transformer.
+
+#### Options
+
+The plugin option `addExports` will enable ES6 modules with a single default export to be used interoperably with CommonJS `require`. This matches the functionality of Babel <6, and basically adds this to the end of modules with a single default export:
+
+    module.exports = exports['default'];
+
+This allows you to use those modules as:
+
+    var foo = require('foo')
+
+instead of
+
+    var foo = require('foo').default
+
+Typical configuration with `.babelrc` and also including the babel runtime:
+
+    {
+        "presets": ["es2015"],
+        "plugins": [
+            "transform-runtime",
+            ["transform-es2015-modules-commonjs-simple", { addExports: true}]
+        ]
+    }
 
 ## Installation
 

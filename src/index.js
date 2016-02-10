@@ -144,6 +144,8 @@ export default function () {
           scope.rename("require");
 
           let hasExports = false;
+          let hasDefaultExport = false;
+          let hasNamedExport = false;
           let hasImports = false;
 
           let body = path.get("body");
@@ -180,11 +182,19 @@ export default function () {
             return requires[source] = ref;
           }
 
+          function checkExportType(exportName) {
+            if (exportName === 'default') {
+              hasDefaultExport = true;
+            } else {
+              hasNamedExport = true;
+            }
+          }
+
           function addTo(obj, key, arr) {
             let existing = obj[key] || [];
             obj[key] = existing.concat(arr);
           }
-debugger;
+
           for (let path of body) {
             if (path.isExportDeclaration()) {
               hasExports = true;
@@ -203,6 +213,7 @@ debugger;
               addTo(imports, path.node.source.value, path.node.specifiers);
               path.remove();
             } else if (path.isExportDefaultDeclaration()) {
+              hasDefaultExport = true;
               let declaration = path.get("declaration");
               if (declaration.isFunctionDeclaration()) {
                 let id = declaration.node.id;
@@ -234,12 +245,17 @@ debugger;
               let declaration = path.get("declaration");
               if (declaration.node) {
                 if (declaration.isFunctionDeclaration()) {
+
                   let id = declaration.node.id;
+                  
+                  checkExportType(id.name);
                   addTo(exports, id.name, id);
                   topNodes.push(buildExportsAssignment(id, id));
                   path.replaceWith(declaration.node);
                 } else if (declaration.isClassDeclaration()) {
                   let id = declaration.node.id;
+                  
+                  checkExportType(id.name);
                   addTo(exports, id.name, id);
                   path.replaceWithMultiple([
                     declaration.node,
@@ -254,6 +270,8 @@ debugger;
                     let init = decl.get("init");
                     if (!init.node) init.replaceWith(t.identifier("undefined"));
 
+                    hasNamedExport = true; // "default" is not a valid symbol name
+                    
                     if (id.isIdentifier()) {
                       addTo(exports, id.node.name, id.node);
                       init.replaceWith(buildExportsAssignment(id.node, init.node).expression);
@@ -280,6 +298,7 @@ debugger;
                     } else if (specifier.isExportDefaultSpecifier()) {
                       // todo
                     } else if (specifier.isExportSpecifier()) {
+                      checkExportType(specifier.node.exported.name);
                       topNodes.push(buildExportsFrom(t.stringLiteral(specifier.node.exported.name), 
                           t.memberExpression(ref, specifier.node.local)));
 
@@ -289,6 +308,7 @@ debugger;
                 } else {
                   for (let specifier of specifiers) {
                     if (specifier.isExportSpecifier()) {
+                      checkExportType(specifier.node.exported.name);
                       addTo(exports, specifier.node.local.name, specifier.node.exported);
                       nonHoistedExportNames[specifier.node.exported.name] = true;
                       nodes.push(buildExportsAssignment(specifier.node.exported, specifier.node.local));
@@ -298,6 +318,7 @@ debugger;
                 path.replaceWithMultiple(nodes);
               }
             } else if (path.isExportAllDeclaration()) {
+              hasNamedExport = true;
               topNodes.push(buildExportAll({
                 KEY: path.scope.generateUidIdentifier("key"),
                 OBJECT: addRequire(path.node.source.value)
@@ -372,7 +393,21 @@ debugger;
             topNodes.unshift(buildTemplate());
           }
 
+          /*
+          console.log({
+            "addExports": this.opts.addExports,
+            "hasDefaultExport": hasDefaultExport,
+            "hasNamedExport": hasNamedExport
+          })
+          */
+          
           path.unshiftContainer("body", topNodes);
+
+          if (this.opts.addExports && hasDefaultExport && !hasNamedExport) {
+             path.pushContainer("body", template("module.exports = exports['default']")());
+          }
+
+
           path.traverse(reassignmentVisitor, { remaps, scope, exports });
         }
       }
