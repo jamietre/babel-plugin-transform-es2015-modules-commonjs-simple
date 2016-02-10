@@ -1,12 +1,14 @@
 # babel-plugin-transform-es2015-modules-commonjs-simple
 
-The regular `babel-plugin-transform-es2015-modules-commonjs` mangles symbol names in order to imlement the fact that ES6 modules export *bindings* rather than references or values.
+Use ES6 Module Format While Preserving Imported Symbol Names
+
+The regular *babel-plugin-transform-es2015-modules-commonjs* module mangles symbol names in order to imlement the fact that ES6 modules export bindings rather than references or values.
 
 The upshot of this is that when debugging using source maps, any imports will not be available under their original name, which is can make for a difficult debugging experience. This module ensures that all symbol names are preserved. 
 
 This module also adds an `addExport` to allow modules with a single default export to be interoperable with CommonJS as they were in babel <5.
 
-#### Using it
+## Using it
 
 If you are using a preset, it probably already includes `babel-plugin-transform-es2015-commonjs`. You can most likely get away with just adding this plugin to your config:
 
@@ -19,7 +21,7 @@ This does not actually override the existing plugin - they both run. But, Babel 
 
 So this may not be perfectly efficient - but it should be safe. The only other alternative would be to create your own preset that excludes the CommonJS transformer.
 
-#### Options
+## Options
 
 The plugin option `addExports` will enable ES6 modules with a single default export to be used interoperably with CommonJS `require`. This matches the functionality of Babel <6, and basically adds this to the end of modules with a single default export:
 
@@ -52,7 +54,7 @@ $ npm install babel-plugin-transform-es2015-modules-commonjs-simple --save-dev
 
 ## Details of what's really going on here
 
-There's a reason the native babel transform mangles variable names, and you might need this. The ES6 module format uses specifies that bindings, and not objects, are exported. This means if an exported entity mutates within the module, consumers that reference the exported entity will refer to the actual current value of the symbol, not the reference or value that was originally exported.
+There's a reason the native babel transform mangles variable names, and you might need this. The ES6 module format specifies that bindings, and not objects, are exported. This means if an exported entity mutates within the module, consumers that reference the exported entity will refer to the actual current value of the symbol, not the reference or value that was originally exported.
 
 #### How does Babel enable dynamic bindings?
 
