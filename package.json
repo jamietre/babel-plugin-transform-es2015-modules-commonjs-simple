@@ -10,7 +10,7 @@
   "main": "lib/index.js",
   "scripts": {
     "prepublish": "npm run build",
-    "postinstall": "node -e \"require('fs').readdir('src',function(e) { require('child_process').exec('npm run prepublish')})\"",
+    "_postinstall": "node -e \"require('fs').readdir('src',function(e) { require('child_process').exec('npm run prepublish')})\"",
     "build": "babel src --out-dir lib",
     "lint": "eslint src",
     "pretest": "npm run lint",
