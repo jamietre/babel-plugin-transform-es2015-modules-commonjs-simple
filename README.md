@@ -2,11 +2,11 @@
 
 Use ES6 Module Format While Preserving Imported Symbol Names
 
-The regular *babel-plugin-transform-es2015-modules-commonjs* module mangles symbol names in order to imlement the fact that ES6 modules export bindings rather than references or values.
+The regular *babel-plugin-transform-es2015-modules-commonjs* module mangles symbol names in order to imlement the ES6 modules feature of exporting bindings rather than references or values.
 
-The upshot of this is that when debugging using source maps, any imports will not be available under their original name, which is can make for a difficult debugging experience. This module ensures that all symbol names are preserved. 
+However, JavaScript source maps don't currently support mapping symbol names. So when debugging using source maps, any imports will not be available under their original name, which is can make for a frustrating experience. This module ensures that all symbol names are preserved. 
 
-This module also adds an `addExport` to allow modules with a single default export to be interoperable with CommonJS as they were in babel <5.
+This module also adds an `addExport` option to allow modules with a single default export to be interoperable with CommonJS as they were in babel <6.
 
 ## Using it
 
@@ -70,7 +70,7 @@ is transformed to
 
     console.log(_foo2["default"].text)
 
-Since the parent object never chagnes, any changes in values will always be current, as they are always resolved when evaluated.
+Since the parent object never changes, any changes in values will always be current, as they are always resolved when evaluated.
 
 #### Why is this a problem?
 
