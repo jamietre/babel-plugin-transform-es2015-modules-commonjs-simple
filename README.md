@@ -52,7 +52,7 @@ instead of
 
     npm test
 
-You can run individual tests using a special convetion, see `test/index.js`
+You can run individual tests using a special convention, see `test/index.js`
 
 ## Details of what's really going on here
 

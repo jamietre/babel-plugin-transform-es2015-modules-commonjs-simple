@@ -1,17 +1,19 @@
-/* Run tests expecting the following structure in a folkder "fixtures":
+/* Run tests expecting the following structure in a folder "fixtures":
 
    testGroup/
      options.json
      testName/
        actual.js
        expected.js
+       options.json
        
-   options.json are babel options for the tests in that group. These will be merged with any higher-level options.
-   A special property "throws" can be present in options.json at the test level, which will test for that error being thrown,
+   options.json are babel options for the tests in that group or test. Test options will be merged with group options.
+   A special property "throws" can be present, which will test for that error being thrown,
    
    You can invoke this with options
    
-   --path  group/test
+   --path group
+   --path group/test
    
     Only run tests that match the pattern, use a * to match any group or test. If only one segment is passed, 
     will run all tests in the group. For example:
@@ -61,17 +63,6 @@ function testGroup(testRoot, testGroup) {
     test(fixtureRoot, folder, opts);
   });
   
-}
-
-// ensure o/s specific line endings, and multiple blank lines aren't a problem:
-//   -- normalize line endings
-//   -- remove duplicate all all blank lines
-//   -- ensure every file ends with a newline
-
-function normalizeEndings(text) {
-  text = text + "\n";
-  return text.replace(/\r\n/g, "\n")
-    .replace(/[\n]{2,}/g, "\n");
 }
 
 function test(fixtureRoot, fixtureName, options) {
@@ -127,15 +118,28 @@ function getOpts(srcpath) {
     opts = JSON.parse(fs.readFileSync(path.resolve(srcpath, "options.json"), textEncoding));
   }
   catch(e) { } 
-  return opts;
-  
+  return opts; 
 }
+
+/* ensure o/s specific line endings, and multiple blank lines aren't a problem:
+   -- normalize line endings
+   -- remove duplicate all all blank lines
+   -- ensure every file ends with a newline
+*/
+
+function normalizeEndings(text) {
+  text = text + "\n";
+  return text.replace(/\r\n/g, "\n")
+    .replace(/[\n]{2,}/g, "\n");
+}
+
+// main code
 
 var testRoot = path.join(__dirname, "fixtures");
 
 getDirectories(testRoot)
-.filter(function(folder) {
-    return !groupName || folder === groupName;
-})
-.map(_.partial(testGroup, testRoot));
+  .filter(function(folder) {
+      return !groupName || folder === groupName;
+  })
+  .map(_.partial(testGroup, testRoot));
 
