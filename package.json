@@ -14,10 +14,7 @@
     "build": "babel src --out-dir lib",
     "lint": "eslint src",
     "pretest": "npm run lint",
-    "test": "mocha --opts test/mocha.opts test/index.js",
-    "t": "mocha --opts test/mocha.opts test/index.js --path",
-    "t2": "mocha --opts test/mocha.opts test/index.js --path auxiliary-comment/overview",
-    "td": "mocha --debug-brk --opts test/mocha.opts test/index.js --path"
+    "test": "mocha --opts test/mocha.opts test/index.js"
   },
   "dependencies": {
     "babel-runtime": "^6.5.0",
