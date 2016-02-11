@@ -8,7 +8,13 @@ However, JavaScript source maps don't currently support mapping symbol names. So
 
 This module also adds an `addExport` option to allow modules with a single default export to be interoperable with CommonJS as they were in babel <6.
 
-## Using it
+## Installation
+
+```sh
+$ npm install babel-plugin-transform-es2015-modules-commonjs-simple --save-dev
+```
+
+## Usage
 
 If you are using a preset, it probably already includes `babel-plugin-transform-es2015-commonjs`. You can most likely get away with just adding this plugin to your config:
 
@@ -34,23 +40,6 @@ This allows you to use those modules as:
 instead of
 
     var foo = require('foo').default
-
-Typical configuration with `.babelrc` and also including the babel runtime:
-
-    {
-        "presets": ["es2015"],
-        "plugins": [
-            "transform-runtime",
-            ["transform-es2015-modules-commonjs-simple", { addExports: true}]
-        ]
-    }
-
-## Installation
-
-```sh
-$ npm install babel-plugin-transform-es2015-modules-commonjs-simple --save-dev
-```
-
 
 ## Details of what's really going on here
 
