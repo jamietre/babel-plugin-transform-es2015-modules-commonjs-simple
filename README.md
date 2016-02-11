@@ -2,7 +2,7 @@
 
 Use ES6 Module Format While Preserving Imported Symbol Names
 
-The regular *babel-plugin-transform-es2015-modules-commonjs* module mangles symbol names in order to imlement the ES6 modules feature of exporting bindings rather than references or values.
+The regular *babel-plugin-transform-es2015-modules-commonjs* module mangles symbol names in order to implement the ES6 modules feature of exporting bindings rather than references or values.
 
 However, JavaScript source maps don't currently support mapping symbol names. So when debugging using source maps, any imports will not be available under their original name, which is can make for a frustrating experience. This module ensures that all symbol names are preserved. 
 
@@ -41,6 +41,19 @@ instead of
 
     var foo = require('foo').default
 
+
+## Building
+
+#### To compile:
+
+    npm install
+
+#### To run tests:
+
+    npm test
+
+You can run individual tests using a special convetion, see `test/index.js`
+
 ## Details of what's really going on here
 
 There's a reason the native babel transform mangles variable names, and you might need this. The ES6 module format specifies that bindings, and not objects, are exported. This means if an exported entity mutates within the module, consumers that reference the exported entity will refer to the actual current value of the symbol, not the reference or value that was originally exported.
@@ -76,18 +89,19 @@ This plugin was created to give ES6 developers the option to sacrifice a feature
 
 This feature isn't especially well-known. Most articles that explain ES6 modules don't mention it at all. [Dr.Rauschmayer of course does](http://www.2ality.com/2015/07/es6-module-exports.html), since he knows all. That article does a good job of explaining why it could be useful.
 
-However, this feature didn't exist with CommonJS modules. It's also unlikely that anything you consume from npm will use it today, since most everything on npm is expected to be a CommonJS module that runs in node, which doesn't know what an ES6 module is. So this is probably not happening anytime soon. If a module author today wants to export a binding, he's probably exporting and object and telling people to refer to properties of the object to support such functionality using CommonJS. 
+However, this feature didn't exist with CommonJS modules. It's also unlikely that anything you consume from npm will use it today, since most everything on npm is expected to be a CommonJS module that runs in node, which doesn't know what an ES6 module is. So this is probably not happening anytime soon. If a module author today wants to export a binding, he's probably exporting an object and telling people to refer to properties of the object.
 
 So if you don't plan to mutate your exports or create circular references in your own code, you should be quite safe to use this.
 
-#### Should I just use CommonJS instead?
+#### Couldn't I just use "require" instead?
 
-Sure! Personally, though, I would much rather write my code with a forward-compatible module syntax, and not use a feature, then write non-forward-compatible CommonJS modules that also doesn't use a feature that doesn't exist.
+Sure! If you use `require` to import modules instead of `import`, then symbol names won't be mangled. 
+
+Personally, though, I would much rather write my code with a forward-compatible module syntax, and not use a feature, then write non-forward-compatible CommonJS modules that also don't use a feature that doesn't exist with CommonJS modules anyway.
 
 #### ... and what happens to all my code when source maps start supporting symbols mapping?
 
-Just remove this module from your babelrc (or substitute with the default commonjs plugin) and you're done.
-
+Nothing at all. Using this module makes no demands on your source code, it just changes the compiled output. Just remove this module from your `.babelrc` (or substitute with the default commonjs plugin) and you're done.
 
 ## Relationship to Official Babel Transform
 

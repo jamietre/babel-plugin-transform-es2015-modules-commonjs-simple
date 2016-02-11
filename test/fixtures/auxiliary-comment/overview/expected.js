@@ -29,7 +29,7 @@ var /*after*/bar2 = _foo4.foo;
 /*before*/exports. /*after*/test = test;
 var test = /*before*/exports. /*after*/test = 5;
 
-bar(foo);
+bar(foo, bar2);
 
 /* my comment */
 bar2;

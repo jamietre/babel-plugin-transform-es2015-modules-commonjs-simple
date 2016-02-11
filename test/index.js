@@ -6,13 +6,18 @@
        actual.js
        expected.js
        
-   options.json are babel options for the tests in that group.
+   options.json are babel options for the tests in that group. These will be merged with any higher-level options.
+   A special property "throws" can be present in options.json at the test level, which will test for that error being thrown,
    
    You can invoke this with options
    
    --path  group/test
    
-    Only run tests that match the pattern, use a * to match any group or test. If only one segment is passed, will run all tests in the group.
+    Only run tests that match the pattern, use a * to match any group or test. If only one segment is passed, 
+    will run all tests in the group. For example:
+
+    mocha test/index.js --path interop/imports-hoisting     // run just tests under interop/imports-hoisting
+    mocha test/index.js --path interop                      // run all tests under interop
 
 */
 
@@ -46,7 +51,7 @@ var textEncoding =  'utf8';
 function testGroup(testRoot, testGroup) {
   var fixtureRoot = path.join(testRoot, testGroup);
   
-  opts = getOpts(fixtureRoot)
+  var opts = getOpts(fixtureRoot)
   
   getDirectories(fixtureRoot)
   .filter(function(folder) {
@@ -58,8 +63,15 @@ function testGroup(testRoot, testGroup) {
   
 }
 
+// ensure o/s specific line endings, and multiple blank lines aren't a problem:
+//   -- normalize line endings
+//   -- remove duplicate all all blank lines
+//   -- ensure every file ends with a newline
+
 function normalizeEndings(text) {
-  return text.replace(/\r\n/g, "\n");
+  text = text + "\n";
+  return text.replace(/\r\n/g, "\n")
+    .replace(/[\n]{2,}/g, "\n");
 }
 
 function test(fixtureRoot, fixtureName, options) {
@@ -75,8 +87,17 @@ function test(fixtureRoot, fixtureName, options) {
     options.plugins = plugins;
 
     var testOpts = getOpts(testPath);
+
+    options = _.assign({}, options, testOpts);
+    
+    if (options.throws) {
+      delete options.throws;
+    }
+
+    var actual;
+
     try {
-      var actual = babel.transformFileSync(actualPath, options).code;
+       actual = babel.transformFileSync(actualPath, options).code;
     }
     catch(e) {
       if (testOpts.throws) {

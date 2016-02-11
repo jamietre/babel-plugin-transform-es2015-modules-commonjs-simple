@@ -8,5 +8,5 @@ require("babel-helper-transform-fixture-test-runner")(
     name, 
     {},
     {
-        plugins: ["external-helpers-2", "transform-es2015-modules-commonjs-simple"]
+        plugins: ["external-helpers", "transform-es2015-modules-commonjs-simple"]
     });

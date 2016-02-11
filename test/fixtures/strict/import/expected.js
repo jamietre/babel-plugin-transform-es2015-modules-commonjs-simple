@@ -10,3 +10,4 @@ var foo3 = _foo.foo3;
 foo;
 foo2;
 foo3;
+foo3();
