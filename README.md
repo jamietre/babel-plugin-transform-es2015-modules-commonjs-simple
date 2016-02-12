@@ -10,6 +10,8 @@ This module also adds an `addExport` option to allow modules with a single defau
 
 ## Installation
 
+From [npm](https://www.npmjs.com/package/babel-plugin-transform-es2015-modules-commonjs-simple):
+
 ```sh
 $ npm install babel-plugin-transform-es2015-modules-commonjs-simple --save-dev
 ```
