@@ -1,25 +1,32 @@
-/* Run tests expecting the following structure in a folder "fixtures":
+/* Run tests expecting the following structure under test
 
-   testGroup/
-     options.json
-     testName/
-       actual.js
-       expected.js
-       options.json
-       
-   options.json are babel options for the tests in that group or test. Test options will be merged with group options.
-   A special property "throws" can be present, which will test for that error being thrown,
+  group/
+    subgroup/
+      options.json
+      testName/
+        actual.js
+        expected.js
+        options.json
+      options.json
+    options.json
+
+
+   options.json are babel options for the tests in that group or test. Test options will be merged with group options. 
+   Plugin options will be merged by plugin as well. 
+
+   A special option "throws" can be present, which will test for an error being thrown matching the regex that's the value of 
+   the option.
    
    You can invoke this with options
    
-   --path group
-   --path group/test
+   --path group/subgroup/test
+   --path group/subgroup
    
     Only run tests that match the pattern, use a * to match any group or test. If only one segment is passed, 
     will run all tests in the group. For example:
 
-    mocha test/index.js --path interop/imports-hoisting     // run just tests under interop/imports-hoisting
-    mocha test/index.js --path interop                      // run all tests under interop
+    mocha test/index.js --path fixtures/interop/imports-hoisting     // run just test fixtures/interop/imports-hoisting
+    mocha test/index.js --path nomangle/interop                      // run all tests under nomangle/interop
 
 */
 
