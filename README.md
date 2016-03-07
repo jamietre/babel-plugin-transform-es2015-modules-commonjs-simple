@@ -40,9 +40,11 @@ If you are not using a babel preset, just include this module as a plugin instea
 
 ##### With Presets
 
-If you are using a preset, it probably already includes `babel-plugin-transform-es2015-commonjs`. While you might be able to just add the `plugin` to your `.babelrc`, it doesn't appear to work reliably in all circumstances, so it's not recommended.  [See this discussion for details.](https://github.com/babel/babel-loader/issues/217) at this time to just override a transform when using a preset. [How to create a preset using this module transformer](./creating-presets.md)
+If you are using a preset, it probably already includes `babel-plugin-transform-es2015-commonjs`. While you might be able to just add the `plugin` to your `.babelrc`, it doesn't appear to work reliably in all circumstances, so it's not recommended.  [See this discussion for details.](https://github.com/babel/babel-loader/issues/217). 
 
-## Any easier way?
+I wrote up some basic instructions on [creating a preset using this module transformer](./creating-presets.md) from the native `es2015` preset.
+
+##### Any other clever way to override babel presets?
 
 There's a package called [modify-babel-preset](https://github.com/developit/modify-babel-preset) which ought to let you override any preset with a lot less code. It's a good idea, and it would be nice to not have to keep your own preset "fork" in sync with the current default one. But it didn't seem to work for me; seems to need some updates for the latest version of babel.
 
@@ -80,6 +82,10 @@ All the tests from the native babel transform are under `fixtures`. Tests that v
     npm test
 
 You can run individual tests using a special convention, see `test/index.js`
+
+## Versioning
+
+Starting with 6.6.5, the versions of this package will track the versions of the official `babel-plugin-transform-es2015-modules-commonjs` for simplicity. Since babel is monorepo, it's not possible to just fork the module itself, so I am tracking upstream changes in a fork [babel](https://github.com/jamietre/babel).
 
 ## Details of what's really going on here
 
