@@ -18,16 +18,63 @@ $ npm install babel-plugin-transform-es2015-modules-commonjs-simple --save-dev
 
 ## Usage
 
-If you are using a preset, it probably already includes `babel-plugin-transform-es2015-commonjs`. You can most likely get away with just adding this plugin to your config:
+If you are using a preset, it probably already includes `babel-plugin-transform-es2015-commonjs`. Unfortunately, there seems to be [no reliable way](https://github.com/babel/babel-loader/issues/217) at this time to just override a transform when using a preset. The easiest way around this is to create your own preset. This can be implemented as any other module, or alternatively, just be defined in your project:
+
+    my-project/
+       babel-presets/
+           my-es2015-preset
+              index.js
+              package.json
+
+You need a `package.json` than points to index.js. Just type `npm init` in the folder to create that. Other than that, just copy `index.js` from the default [babel-preset-es2015](https://github.com/babel/babel/blob/master/packages/babel-preset-es2015/index.js) module, and change the module transformer. As of version 6.6.0 it might look like this:
+
+    module.exports = {
+      plugins: [
+        require("babel-plugin-transform-es2015-template-literals"),
+        require("babel-plugin-transform-es2015-literals"),
+        require("babel-plugin-transform-es2015-function-name"),
+        require("babel-plugin-transform-es2015-arrow-functions"),
+        require("babel-plugin-transform-es2015-block-scoped-functions"),
+        require("babel-plugin-transform-es2015-classes"),
+        require("babel-plugin-transform-es2015-object-super"),
+        require("babel-plugin-transform-es2015-shorthand-properties"),
+        require("babel-plugin-transform-es2015-duplicate-keys"),
+        require("babel-plugin-transform-es2015-computed-properties"),
+        require("babel-plugin-transform-es2015-for-of"),
+        require("babel-plugin-transform-es2015-sticky-regex"),
+        require("babel-plugin-transform-es2015-unicode-regex"),
+        require("babel-plugin-check-es2015-constants"),
+        require("babel-plugin-transform-es2015-spread"),
+        require("babel-plugin-transform-es2015-parameters"),
+        require("babel-plugin-transform-es2015-destructuring"),
+        require("babel-plugin-transform-es2015-block-scoping"),
+        require("babel-plugin-transform-es2015-typeof-symbol"),
+        
+        // replaces babel-plugin-transform-es2015-modules-commonjs
+        // note the "default" after the require -- for some reason you can't actually compile babel modules without them being exported 
+        // as "default" with the regular babeb commonjs transform, yet the official babel modules themselves don't export "default". 
+        // This one does -- so you need to refer to ".default" when requiring it.
+        
+        [require("babel-plugin-transform-es2015-modules-commonjs-simple").default, {
+            addExports: true
+        }],
+
+        [require("babel-plugin-transform-regenerator"), { async: false, asyncGenerators: false }],
+      ]
+    };
+
+Then in your `.babelrc`:
 
     {
-        "presets": ["es2015"],
-        "plugins": ["transform-es2015-modules-commonjs-simple"]
+        "presets": ["./babel-presets/my-es2015-preset"],
+        "sourceMaps": true
     }
 
-This does not actually override the existing plugin - they both run. But, Babel runs the plugins from your local configuration before presets, so the module will already be transformed, meaning that there will be nothing to do when the module transform from the preset runs.
+Make sure you include `babel-preset-es2015` as a dev dependency of your project, too, so all the babel plugins above are installed.
 
-So this may not be perfectly efficient - but it should be safe. The only other alternative would be to create your own preset that excludes the CommonJS transformer.
+## Any easier way?
+
+There's a package called [modify-babel-preset](https://github.com/developit/modify-babel-preset) which ought to let you override any preset with a lot less code. It's a good idea, and it would be nice to not have to keep your own preset "fork" in sync with the current default one. But it didn't seem to work for me; seems to need some updates for the latest version of babel.
 
 ## Options
 

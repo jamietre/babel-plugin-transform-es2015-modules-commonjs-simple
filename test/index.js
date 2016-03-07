@@ -29,6 +29,8 @@ var path = require('path');
 var babel = require('babel-core');
 var _ = require('lodash');
 var args = require('yargs').argv;
+var appRoot = require('app-root-path');
+
 
 var groupName;
 var testName;
@@ -72,20 +74,19 @@ function test(fixtureRoot, fixtureName, options) {
     var expectedPath = path.join(testPath, 'expected.js');
 
     var libOpts = options.pluginOpts || {};
-    var plugins = (options.plugins || []).concat([['../lib', libOpts]])
+    var plugins = (options.plugins || []).concat([[appRoot.resolve('/lib'), libOpts]])
     delete options.pluginOpts;
 
-    options.plugins = plugins;
-
     var testOpts = getOpts(testPath);
-
     options = _.assign({}, options, testOpts);
+    options.plugins = options.plugins.concat(plugins);
     
     if (options.throws) {
       delete options.throws;
     }
 
     var actual;
+
 
     try {
        actual = babel.transformFileSync(actualPath, options).code;
