@@ -13,22 +13,19 @@ require("./directory/foo-bar");
 
 var _foo = require("foo2");
 
-var foo = babelHelpers.interopRequireDefault(_foo).default;
+var _foo2 = babelHelpers.interopRequireDefault(_foo);
 
-var _foo2 = require("foo3");
+var _foo3 = require("foo3");
 
-var foo2 = babelHelpers.interopRequireWildcard(_foo2);
+var foo2 = babelHelpers.interopRequireWildcard(_foo3);
 
-var _foo3 = require("foo4");
+var _foo4 = require("foo4");
 
-var bar = _foo3.bar;
+var _foo5 = require("foo5");
 
-var _foo4 = require("foo5");
-
-var bar2 = _foo4.foo;
 exports.test = test;
 var test = exports.test = 5;
 
-bar;
-bar2;
-foo;
+_foo4.bar;
+_foo5.foo;
+_foo2.default;

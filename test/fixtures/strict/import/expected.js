@@ -2,12 +2,7 @@
 
 var _foo = require("foo");
 
-var foo = babelHelpers.interopRequireDefault(_foo).default;
-var foo2 = babelHelpers.interopRequireDefault(_foo).default;
-var foo3 = _foo.foo3;
-
-
-foo;
-foo2;
-foo3;
-foo3();
+_foo.default;
+_foo.default;
+_foo.foo3;
+(0, _foo.foo3)();

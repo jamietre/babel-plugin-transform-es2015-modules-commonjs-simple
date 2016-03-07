@@ -6,6 +6,8 @@ The regular *babel-plugin-transform-es2015-modules-commonjs* module mangles symb
 
 However, JavaScript source maps don't currently support mapping symbol names. So when debugging using source maps, any imports will not be available under their original name, which is can make for a frustrating experience. This module ensures that all symbol names are preserved. 
 
+This module adds a `noMangle` option that, when true, prevents variable names from being mangled.
+
 This module also adds an `addExport` option to allow modules with a single default export to be interoperable with CommonJS as they were in babel <6.
 
 ## Installation
@@ -13,64 +15,33 @@ This module also adds an `addExport` option to allow modules with a single defau
 From [npm](https://www.npmjs.com/package/babel-plugin-transform-es2015-modules-commonjs-simple):
 
 ```sh
-$ npm install babel-plugin-transform-es2015-modules-commonjs-simple --save-dev
+$ npm install --save-dev babel-plugin-transform-es2015-modules-commonjs-simple
 ```
 
 ## Usage
 
-If you are using a preset, it probably already includes `babel-plugin-transform-es2015-commonjs`. Unfortunately, there seems to be [no reliable way](https://github.com/babel/babel-loader/issues/217) at this time to just override a transform when using a preset. The easiest way around this is to create your own preset. This can be implemented as any other module, or alternatively, just be defined in your project:
 
-    my-project/
-       babel-presets/
-           my-es2015-preset
-              index.js
-              package.json
+##### Without Presets 
 
-You need a `package.json` than points to index.js. Just type `npm init` in the folder to create that. Other than that, just copy `index.js` from the default [babel-preset-es2015](https://github.com/babel/babel/blob/master/packages/babel-preset-es2015/index.js) module, and change the module transformer. As of version 6.6.0 it might look like this:
+If you are not using a babel preset, just include this module as a plugin instead of `transform-es2015-modules-commonjs` and add the option `noMangle: true`:
 
-    module.exports = {
-      plugins: [
-        require("babel-plugin-transform-es2015-template-literals"),
-        require("babel-plugin-transform-es2015-literals"),
-        require("babel-plugin-transform-es2015-function-name"),
-        require("babel-plugin-transform-es2015-arrow-functions"),
-        require("babel-plugin-transform-es2015-block-scoped-functions"),
-        require("babel-plugin-transform-es2015-classes"),
-        require("babel-plugin-transform-es2015-object-super"),
-        require("babel-plugin-transform-es2015-shorthand-properties"),
-        require("babel-plugin-transform-es2015-duplicate-keys"),
-        require("babel-plugin-transform-es2015-computed-properties"),
-        require("babel-plugin-transform-es2015-for-of"),
-        require("babel-plugin-transform-es2015-sticky-regex"),
-        require("babel-plugin-transform-es2015-unicode-regex"),
-        require("babel-plugin-check-es2015-constants"),
-        require("babel-plugin-transform-es2015-spread"),
-        require("babel-plugin-transform-es2015-parameters"),
-        require("babel-plugin-transform-es2015-destructuring"),
-        require("babel-plugin-transform-es2015-block-scoping"),
-        require("babel-plugin-transform-es2015-typeof-symbol"),
-        
-        // replaces babel-plugin-transform-es2015-modules-commonjs
-        // note the "default" after the require -- for some reason you can't actually compile babel modules without them being exported 
-        // as "default" with the regular babeb commonjs transform, yet the official babel modules themselves don't export "default". 
-        // This one does -- so you need to refer to ".default" when requiring it.
-        
-        [require("babel-plugin-transform-es2015-modules-commonjs-simple").default, {
-            addExports: true
-        }],
-
-        [require("babel-plugin-transform-regenerator"), { async: false, asyncGenerators: false }],
-      ]
-    };
-
-Then in your `.babelrc`:
+.babelrc
 
     {
-        "presets": ["./babel-presets/my-es2015-preset"],
-        "sourceMaps": true
+        plugins: [
+            "transform-es2015-arrow-functions",
+            "transform-es2015-tempalte-literals",
+            ... 
+            ["transform-es2015-modules-commonjs-simple", {
+                noMangle: true
+            }],
+            "sourceMaps": true
+        ]
     }
 
-Make sure you include `babel-preset-es2015` as a dev dependency of your project, too, so all the babel plugins above are installed.
+##### With Presets
+
+If you are using a preset, it probably already includes `babel-plugin-transform-es2015-commonjs`. While you might be able to just add the `plugin` to your `.babelrc`, it doesn't appear to work reliably in all circumstances, so it's not recommended.  [See this discussion for details.](https://github.com/babel/babel-loader/issues/217) at this time to just override a transform when using a preset. [How to create a preset using this module transformer](./creating-presets.md)
 
 ## Any easier way?
 
@@ -78,7 +49,13 @@ There's a package called [modify-babel-preset](https://github.com/developit/modi
 
 ## Options
 
-The plugin option `addExports` will enable ES6 modules with a single default export to be used interoperably with CommonJS `require`. This matches the functionality of Babel <6, and basically adds this to the end of modules with a single default export:
+##### noMangle
+
+When true, will prevent variable names from being mangled. 
+
+##### addExports
+
+when true, will enable ES6 modules with a single default export to be used interoperably with CommonJS `require`. This matches the functionality of Babel <6, and basically adds this to the end of modules with a single default export:
 
     module.exports = exports['default'];
 
@@ -98,6 +75,8 @@ instead of
     npm install
 
 #### To run tests:
+
+All the tests from the native babel transform are under `fixtures`. Tests that validate the new features are under `nomangle` and `addexport`
 
     npm test
 

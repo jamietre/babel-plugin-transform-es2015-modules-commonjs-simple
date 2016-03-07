@@ -13,24 +13,21 @@ require("./directory/foo-bar");
 
 var _foo = require("foo2");
 
-var /*after*/foo = babelHelpers.interopRequireDefault(_foo).default;
-/*before*/
-var _foo2 = require("foo3");
+var _foo2 = babelHelpers.interopRequireDefault(_foo);
 
-var /*after*/foo2 = babelHelpers.interopRequireWildcard(_foo2);
-/*before*/
-var _foo3 = require("foo4");
+var _foo3 = require("foo3");
 
-var /*after*/bar = _foo3.bar;
+var /*after*/foo2 = babelHelpers.interopRequireWildcard(_foo3);
 /*before*/
-var _foo4 = require("foo5");
+var _foo4 = require("foo4");
 
-var /*after*/bar2 = _foo4.foo;
-/*before*/exports. /*after*/test = test;
+var _foo5 = require("foo5");
+
+exports. /*after*/test = test;
 var test = /*before*/exports. /*after*/test = 5;
 
-bar(foo, bar2);
+/*before*/(0, _foo4.bar) /*after*/( /*before*/_foo2.default /*after*/, /*before*/_foo5.foo /*after*/);
 
 /* my comment */
-bar2;
-foo;
+/*before*/_foo5.foo; /*after*/
+/*before*/_foo2.default; /*after*/

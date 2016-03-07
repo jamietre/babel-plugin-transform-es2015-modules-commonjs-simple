@@ -1,0 +1,5 @@
+{
+  "plugins": ["external-helpers"],
+  "auxiliaryCommentBefore": "before",
+  "auxiliaryCommentAfter": "after"
+}

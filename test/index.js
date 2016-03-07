@@ -31,71 +31,70 @@ var _ = require('lodash');
 var args = require('yargs').argv;
 var appRoot = require('app-root-path');
 
+var PLUGIN_NAME = "transform-es2015-modules-commonjs-simple";
+var ORIGINAL_PLUGIN_NAME = "transform-es2015-modules-commonjs";
 
-var groupName;
-var testName;
 var testPath = args.path;
+var parts = [];
 
 if (testPath) {
-  var parts = testPath.split('/');
-  if (parts.length === 0 || parts.length > 2) {
-    console.log("--path must include an argument that includes one or two parts, separated by a slash, e.g. '*/overview' or 'auxiliary-comment'");
+  parts = testPath.split('/');
+  if (parts.length === 0 || parts.length > 3) {
+    console.log("--path must include an argument that 1-3 parts, separated by a slash, e.g. '*/overview' or 'auxiliary-comment'");
     process.exit(1);
-  }
-  if (parts[0] !== '*') {
-    groupName = parts[0];
-  }
-  if (parts.length > 1 && parts[1] !== '*') {
-    testName = parts[1];
   }
 }
 
+while (parts.length < 3) parts.push('*');
+
+var maxDepth = 2;
 var textEncoding =  'utf8';
 
-function testGroup(testRoot, testGroup) {
-  var fixtureRoot = path.join(testRoot, testGroup);
+function testGroup(dir, name, options, depth) {
+  //var fixtureRoot = path.join(testRoot, testGroup);
   
-  var opts = getOpts(fixtureRoot)
-  
-  getDirectories(fixtureRoot)
+  depth = depth || 0;
+  var opts = mergeOpts(options, getOpts(dir));
+
+  var filter = parts[depth];
+
+  getDirectories(dir)
   .filter(function(folder) {
-     return !testName || folder === testName;
-  })
-  .map(function(folder) {
-    test(fixtureRoot, folder, opts);
+     return filter === '*' || folder === filter;
+  }).map(function(folder) {
+    (depth === maxDepth ? test : testGroup)(path.join(dir, folder), `${name}/${folder}`, opts, depth+1);
   });
   
 }
 
-function test(fixtureRoot, fixtureName, options) {
-  it(fixtureName, function () {
-    var testPath = path.resolve(fixtureRoot, fixtureName);
-    var actualPath = path.join(testPath, 'actual.js');
-    var expectedPath = path.join(testPath, 'expected.js');
 
-    var libOpts = options.pluginOpts || {};
-    var plugins = (options.plugins || []).concat([[appRoot.resolve('/lib'), libOpts]])
-    delete options.pluginOpts;
+function test(dir, name, options) {
+  it(name, function () {
+    var actualPath = path.join(dir, 'actual.js');
+    var expectedPath = path.join(dir, 'expected.js');
 
-    var testOpts = getOpts(testPath);
-    options = _.assign({}, options, testOpts);
-    options.plugins = options.plugins.concat(plugins);
-    
-    if (options.throws) {
-      delete options.throws;
-    }
+    var opts = mergeOpts(options, getOpts(dir));
+    var throwsOpt = opts.throws;
+
+
+    deleteTestingOptions(opts);
+
+    opts = finalizeOpts(opts);
 
     var actual;
 
-
     try {
-       actual = babel.transformFileSync(actualPath, options).code;
+       actual = babel.transformFileSync(actualPath, opts).code;
     }
     catch(e) {
-      if (testOpts.throws) {
-        var regex = new RegExp(testOpts.throws);
-        assert.ok(regex.test(e.message), "Should throw an error matching pattern /" + testOpts.throws + "/");
-        return;
+      if (throwsOpt) {
+        var regex = new RegExp(throwsOpt);
+        var expectedPattern = "Pattern /" + throwsOpt + "/";
+        if (!regex.test(e.message)) {
+          assert.equal(expectedPattern, e.message, "Should throw an error matching the pattern");
+        } else {
+          return assert.ok(expectedPattern);
+        }
       } 
       throw e;
     }
@@ -103,6 +102,12 @@ function test(fixtureRoot, fixtureName, options) {
     var expected = fs.readFileSync(expectedPath, textEncoding);
 
     assert.equal(normalizeEndings(actual), normalizeEndings(expected));
+  });
+}
+
+function deleteTestingOptions(options) {
+  ["throws"].forEach(function(e) {
+    if (options[e]) delete options[e];
   });
 }
 
@@ -122,6 +127,75 @@ function getOpts(srcpath) {
   return opts; 
 }
 
+function finalizeOpts(opts) {
+
+  // convert module name to relative path
+  
+  opts.plugins = (opts.plugins||[]).map(function(e) {
+
+      if (e[0] === PLUGIN_NAME) {
+        e[0] = appRoot.resolve("/lib");
+      }
+
+      return e.length === 1 ? 
+        e[0] : 
+        e;
+    });
+    
+    return opts;
+
+}
+
+function asArray(obj) {
+  if (obj === null || obj === undefined) return [];
+  return Array.isArray(obj) ?
+    obj.map(function(e) {
+      return e;
+    }) : 
+    [obj];
+}
+
+function mergeOpts(target, src) {
+    var last = null;
+
+    var plugins = (target.plugins || [])
+      .concat(src.plugins || []);
+    
+    plugins = plugins.map(function(e) {
+        e = asArray(e);
+
+        if (e[0] === ORIGINAL_PLUGIN_NAME) {
+          e[0] = PLUGIN_NAME;
+        }
+        return e;
+      })
+      // remove dup module defs
+      .sort(function(a,b) {
+        
+        return a[0].localeCompare(b[0]);
+      })
+      .filter(function(e) {
+        if (!last || e[0] !== last[0]) {
+          last = e;
+          return true;
+        };
+
+        // merge plugin options from child options.json
+        if (e[1]) {
+          last[1] = _.assign({}, last[1], e[1]);
+        }
+        
+        return false;
+      });
+
+
+    var options = _.assign({}, target, src);
+    options.plugins = plugins;
+
+    return options;
+}
+
+
 /* ensure o/s specific line endings, and multiple blank lines aren't a problem:
    -- normalize line endings
    -- remove duplicate all all blank lines
@@ -136,11 +210,13 @@ function normalizeEndings(text) {
 
 // main code
 
-var testRoot = path.join(__dirname, "fixtures");
+testGroup(__dirname, '', {});
 
-getDirectories(testRoot)
-  .filter(function(folder) {
-      return !groupName || folder === groupName;
-  })
-  .map(_.partial(testGroup, testRoot));
+// var testRoot = path.join(__dirname, "fixtures");
+
+// getDirectories(0, __dirname)
+//   .filter(function(folder) {
+//       return !groupName || folder === groupName;
+//   })
+//   .map(_.partial(testGroup, testRoot));
 
