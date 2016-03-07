@@ -20,7 +20,6 @@ $ npm install --save-dev babel-plugin-transform-es2015-modules-commonjs-simple
 
 ## Usage
 
-
 ##### Without Presets 
 
 If you are not using a babel preset, just include this module as a plugin instead of `transform-es2015-modules-commonjs` and add the option `noMangle: true`:
