@@ -38,18 +38,17 @@ If you are not using a babel preset, just include this module as a plugin instea
         "sourceMaps": true
     }
 
-##### With Presets
+##### With Babel Native Presets
 
 If you are using a preset, it probably already includes `babel-plugin-transform-es2015-commonjs`. While you might be able to just add the `plugin` to your `.babelrc`, it doesn't appear to work reliably in all circumstances, so it's not recommended.  [See this discussion for details.](https://github.com/babel/babel-loader/issues/217). 
 
-I wrote up some basic instructions on [creating a preset using this module transformer](./creating-presets.md) from the native `es2015` preset.
-
+I wrote up some basic instructions on [creating your own preset using this module transformer](./creating-presets.md) based on the native `es2015` preset.
 
 ##### With ES2015 preset
 
-Someone's been gracious enough to create a package for the ES2015 babel preset that has everything *except* `babel-plugin-transform-es2015-commonjs`, [here.](https://github.com/gajus/babel-preset-es2015-webpack)
+If you're just using the generic ES2015 preset, then someone's been gracious enough to create a package for the ES2015 babel preset that has everything *except* `babel-plugin-transform-es2015-commonjs`, [here.](https://github.com/gajus/babel-preset-es2015-webpack)
 
-So, just install that preset and then:
+So, with that installed:
 
 .babelrc
 
@@ -60,13 +59,11 @@ So, just install that preset and then:
         plugins: [
             ["transform-es2015-modules-commonjs-simple", {
                 noMangle: true
-            }],
-            "sourceMaps": true
+            }]
         ]
+        "sourceMaps": true
+    }
 
-}
-    npm install --save-dev babel-preset-es2015-webpack
-    npm install --save-dev babel-preset-es2015-webpack
 
 ##### Any other clever way to override babel presets?
 
