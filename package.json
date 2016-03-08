@@ -32,6 +32,8 @@
     "babel-eslint": "^5.0.0",
     "babel-helper-plugin-test-runner": "^6.5.0",
     "babel-plugin-external-helpers": "^6.5.0",
+    "babel-plugin-transform-es2015-block-scoping": "^6.6.5",
+    "babel-plugin-transform-es2015-template-literals": "^6.6.5",
     "babel-plugin-transform-es3-member-expression-literals": "^6.5.0",
     "babel-plugin-transform-es3-property-literals": "^6.5.0",
     "babel-plugin-transform-flow-strip-types": "^6.6.5",
