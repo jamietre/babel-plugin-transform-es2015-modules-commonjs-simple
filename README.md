@@ -30,12 +30,12 @@ If you are not using a babel preset, just include this module as a plugin instea
 .babelrc
 
     {
-        plugins: [
+        "plugins": [
             "transform-es2015-arrow-functions",
             "transform-es2015-tempalte-literals",
             ... 
             ["transform-es2015-modules-commonjs-simple", {
-                noMangle: true
+                "noMangle": true
             }]
         ],
         "sourceMaps": true
@@ -59,9 +59,9 @@ So, with that installed:
         "presets": [
             "es2015-webpack"
         ],
-        plugins: [
+        "plugins": [
             ["transform-es2015-modules-commonjs-simple", {
-                noMangle: true
+                "noMangle": true
             }]
         ]
         "sourceMaps": true
