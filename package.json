@@ -29,6 +29,7 @@
     "app-root-path": "^1.0.0",
     "babel-cli": "^6.6.5",
     "babel-core": "^6.6.5",
+    "babel-eslint": "^5.0.0",
     "babel-helper-plugin-test-runner": "^6.5.0",
     "babel-plugin-external-helpers": "^6.5.0",
     "babel-plugin-transform-es3-member-expression-literals": "^6.5.0",
