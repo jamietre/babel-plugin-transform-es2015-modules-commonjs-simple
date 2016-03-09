@@ -201,6 +201,12 @@ export default function () {
               ).expression)
             ]);
 
+            // Copy location from the original import statement for sourcemap
+            // generation.
+            if (imports[source]) {
+              varDecl.loc = imports[source].loc;
+            }
+
             if (typeof blockHoist === "number" && blockHoist > 0) {
               varDecl._blockHoist = blockHoist;
             }
@@ -234,7 +240,8 @@ export default function () {
               let key = path.node.source.value;
               let importsEntry = imports[key] || {
                 specifiers: [],
-                maxBlockHoist: 0
+                maxBlockHoist: 0,
+                loc: path.node.loc,
               };
 
               importsEntry.specifiers.push(...path.node.specifiers);
@@ -287,7 +294,7 @@ export default function () {
               let declaration = path.get("declaration");
               if (declaration.node) {
                 if (declaration.isFunctionDeclaration()) {
-                  let id = declaration.node.id;                 
+                  let id = declaration.node.id;
                   checkExportType(id.name);
                   addTo(exports, id.name, id);
                   topNodes.push(buildExportsAssignment(id, id));
@@ -361,31 +368,33 @@ export default function () {
               }
             } else if (path.isExportAllDeclaration()) {
               hasNamedExport = true;
-              topNodes.push(buildExportAll({
+              let exportNode = buildExportAll({
                 OBJECT: addRequire(path.node.source.value, path.node._blockHoist)
-              }));
+              });
+              exportNode.loc = path.node.loc;
+              topNodes.push(exportNode);
               path.remove();
             }
           }
 
           for (let source in imports) {
             let {specifiers, maxBlockHoist} = imports[source];
-            if (specifiers.length) {              
+            if (specifiers.length) {
               let uid = addRequire(source, maxBlockHoist);
 
               let wildcard;
 
               for (let i = 0; i < specifiers.length; i++) {
-                let specifier = specifiers[i];                
+                let specifier = specifiers[i];
                 if (t.isImportNamespaceSpecifier(specifier)) {
                   if (strict) {
                     remaps[specifier.local.name] = uid;
                   } else {
                     const varDecl = t.variableDeclaration("var", [
                       t.variableDeclarator(
-                        specifier.local, 
+                        specifier.local,
                         t.callExpression(
-                          this.addHelper("interopRequireWildcard"), 
+                          this.addHelper("interopRequireWildcard"),
                           [uid]
                         )
                       )
@@ -423,27 +432,27 @@ export default function () {
 
                       topNodes.push(varDecl);
                     } else {
-                      if (wildcard) {
-                        target = wildcard; 
-                      } else {
-                        target = wildcard = path.scope.generateUidIdentifier(uid.name);
-                        const varDecl = t.variableDeclaration("var", [
-                          t.variableDeclarator(
-                            target,
-                            t.callExpression(
-                              this.addHelper("interopRequireDefault"),
-                              [uid]
-                            )
+                    if (wildcard) {
+                      target = wildcard;
+                    } else {
+                      target = wildcard = path.scope.generateUidIdentifier(uid.name);
+                      const varDecl = t.variableDeclaration("var", [
+                        t.variableDeclarator(
+                          target,
+                          t.callExpression(
+                            this.addHelper("interopRequireDefault"),
+                            [uid]
                           )
-                        ]);
+                        )
+                      ]);
 
-                        if (maxBlockHoist > 0) {
-                          varDecl._blockHoist = maxBlockHoist;
-                        }
-
-                        topNodes.push(varDecl);
+                      if (maxBlockHoist > 0) {
+                        varDecl._blockHoist = maxBlockHoist;
                       }
+
+                      topNodes.push(varDecl);
                     }
+                  }
                   } else if (noMangle) {
                     // is a named import
                     target = specifier.local;
@@ -452,24 +461,26 @@ export default function () {
                       t.variableDeclarator(
                         target,
                         t.memberExpression(uid, specifier.imported)
-                      )
-                    ]);
+                          )
+                      ]);
 
-                    if (maxBlockHoist > 0) {
-                      varDecl._blockHoist = maxBlockHoist;
+                      if (maxBlockHoist > 0) {
+                        varDecl._blockHoist = maxBlockHoist;
+                      }
+
+                      topNodes.push(varDecl);
                     }
-
-                    topNodes.push(varDecl);
-                  }
                       
                   if (specifier.local.name !== target.name) {
-                    remaps[specifier.local.name] = t.memberExpression(target, t.cloneWithoutLoc(specifier.imported));
-                  }
-                } 
+                  remaps[specifier.local.name] = t.memberExpression(target, t.cloneWithoutLoc(specifier.imported));
+                }
+              }
               }
             } else {
               // bare import
-              topNodes.push(buildRequire(t.stringLiteral(source)));
+              let requireNode = buildRequire(t.stringLiteral(source));
+              requireNode.loc = imports[source].loc;
+              topNodes.push(requireNode);
             }
           }
 
