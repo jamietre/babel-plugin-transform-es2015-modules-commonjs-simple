@@ -30,13 +30,19 @@
 
 */
 
-var assert = require('assert');
-var fs = require('fs');
-var path = require('path');
-var babel = require('babel-core');
-var _ = require('lodash');
-var args = require('yargs').argv;
-var appRoot = require('app-root-path');
+var chai =      require('chai');
+var fs =        require('fs');
+var path =      require('path');
+var _ =         require('lodash');
+var args =      require('yargs').argv;
+var appRoot =   require('app-root-path');
+
+var babel =     require('babel-core');
+var codeFrame = require("babel-code-frame");
+
+var buildExternalHelpers = babel.buildExternalHelpers;
+var assert = chai.assert;
+var babelHelpers = eval(buildExternalHelpers(null, "var"));
 
 var PLUGIN_NAME = "transform-es2015-modules-commonjs-simple";
 var ORIGINAL_PLUGIN_NAME = "transform-es2015-modules-commonjs";
@@ -65,15 +71,50 @@ function testGroup(dir, name, options, depth) {
 
   var filter = parts[depth];
 
-  getDirectories(dir)
-  .filter(function(folder) {
-     return filter === '*' || folder === filter;
-  }).map(function(folder) {
-    (depth === maxDepth ? test : testGroup)(path.join(dir, folder), `${name}/${folder}`, opts, depth+1);
-  });
-  
+
+  // check for exec.js
+  try {
+    var fname = '/test'+name+'/exec.js';
+    var js = fs.readFileSync(appRoot.resolve(fname), 'utf-8');
+
+    testExec(name, js, opts);
+  }
+  catch(e) {
+    if (e.code !== 'ENOENT') {
+      throw e;
+    }
+
+    // no exec.js - traverse for fixtures
+    
+    getDirectories(dir)
+      .filter(function(folder) {
+         return filter === '*' || folder === filter;
+      }).map(function(folder) {
+        (depth === maxDepth ? test : testGroup)(path.join(dir, folder), `${name}/${folder}`, opts, depth+1);
+      });
+  }
 }
 
+function runExec(opts, execCode) {
+  var fn = new Function('babelHelpers', 'assert', 'transform', 'opts', 'exports', execCode);
+  return fn.apply(null, [babelHelpers, assert, babel.transform, opts, {}]);
+}
+
+// from babel-transform-fixture-test-runner
+
+function testExec(name, execCode, execOpts) {
+  var result = babel.transform(execCode, execOpts);
+    execCode = result.code;
+    try {
+      it(name, function() {
+        runExec(execOpts, execCode);  
+      })
+    } catch (err) {
+      err.message = name + ": " + err.message;
+      err.message += codeFrame(execCode);
+      throw err;
+    }
+}
 
 function test(dir, name, options) {
   it(name, function () {
@@ -124,7 +165,6 @@ function getDirectories(srcpath) {
   });
 }
 
-
 function getOpts(srcpath) {
   var opts = {};
   try {
@@ -151,15 +191,6 @@ function finalizeOpts(opts) {
     
     return opts;
 
-}
-
-function asArray(obj) {
-  if (obj === null || obj === undefined) return [];
-  return Array.isArray(obj) ?
-    obj.map(function(e) {
-      return e;
-    }) : 
-    [obj];
 }
 
 function mergeOpts(target, src) {
@@ -202,6 +233,14 @@ function mergeOpts(target, src) {
     return options;
 }
 
+function asArray(obj) {
+  if (obj === null || obj === undefined) return [];
+  return Array.isArray(obj) ?
+    obj.map(function(e) {
+      return e;
+    }) : 
+    [obj];
+}
 
 /* ensure o/s specific line endings, and multiple blank lines aren't a problem:
    -- normalize line endings
@@ -215,15 +254,7 @@ function normalizeEndings(text) {
     .replace(/[\n]{2,}/g, "\n");
 }
 
-// main code
+// main entry
 
 testGroup(__dirname, '', {});
-
-// var testRoot = path.join(__dirname, "fixtures");
-
-// getDirectories(0, __dirname)
-//   .filter(function(folder) {
-//       return !groupName || folder === groupName;
-//   })
-//   .map(_.partial(testGroup, testRoot));
 
