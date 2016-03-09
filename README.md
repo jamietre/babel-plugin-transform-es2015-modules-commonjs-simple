@@ -158,13 +158,10 @@ Personally, though, I would much rather write my code with a forward-compatible 
 
 #### ... and what happens to all my code when source maps start supporting symbols mapping?
 
-Nothing at all. Using this module makes no demands on your source code, it just changes the compiled output. Just remove this module from your `.babelrc` (or substitute with the default commonjs plugin) and you're done.
+Nothing at all. Using this module makes no demands on your source code, it just changes the compiled output.  You can turn off the `noMangle` option to restore the native babel behavior, or swap in the offical plugin with no code changes required.
 
 ## Relationship to Official Babel Transform
 
-This code is almost entirely copied from the babel [source babel-plugin-transform-es2015-commonjs](https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-es2015-modules-commonjs).
+When the `noMangle` option is false, this is code-identical to the native babel [source babel-plugin-transform-es2015-commonjs](https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-es2015-modules-commonjs) transform. This plugin tracks changes to the official transform, but extends it with the options described here.
 
-Because the transforms are all part of the complete babel code repository, this isn't actually a fork. This means it's a little tricky to keep it in sync with upstream changes.
-
-It is current as of the commit 4142003bbd2fe3f862f9ddfde05274ee003de2cc on Feb 5. I will try to keep it updated as the original changes.
 
