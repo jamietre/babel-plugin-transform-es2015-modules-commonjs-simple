@@ -1,9 +1,9 @@
 # babel-plugin-transform-es2015-modules-commonjs-simple
 
+Use ES6 Module Format While Preserving Imported Symbol Names
+
 [![NPM version](http://img.shields.io/npm/v/babel-plugin-transform-es2015-modules-commonjs-simple.svg?style=flat-square)](https://www.npmjs.org/package/babel-plugin-transform-es2015-modules-commonjs-simple)
 [![Travis build status](http://img.shields.io/travis/jamietre/babel-plugin-transform-es2015-modules-commonjs-simple/master.svg?style=flat-square)](https://travis-ci.org/jamietre/babel-plugin-transform-es2015-modules-commonjs-simple)
-
-Use ES6 Module Format While Preserving Imported Symbol Names
 
 The regular *babel-plugin-transform-es2015-modules-commonjs* module mangles symbol names in order to implement the ES6 modules feature of exporting bindings rather than references or values.
 
