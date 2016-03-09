@@ -103,7 +103,7 @@ function runExec(opts, execCode) {
 // from babel-transform-fixture-test-runner
 
 function testExec(name, execCode, execOpts) {
-  var result = babel.transform(execCode, execOpts);
+  var result = babel.transform(execCode, finalizeOpts(execOpts));
     execCode = result.code;
     try {
       it(name, function() {
