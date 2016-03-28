@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-es2015-modules-commonjs-simple",
-  "version": "6.7.0",
+  "version": "6.7.4",
   "description": "",
   "repository": {
     "type": "git",
@@ -23,13 +23,15 @@
     "babel-plugin-transform-strict-mode": "^6.6.5"
   },
   "keywords": [
-    "babel-plugin", "commonjs", "sourcemaps"
+    "babel-plugin",
+    "commonjs",
+    "sourcemaps"
   ],
   "devDependencies": {
     "app-root-path": "^1.0.0",
     "babel-cli": "^6.6.5",
     "babel-code-frame": "^6.6.5",
-    "babel-core": "^6.6.5",
+    "babel-core": "^6.7.4",
     "babel-eslint": "^5.0.0",
     "babel-helper-plugin-test-runner": "^6.5.0",
     "babel-plugin-external-helpers": "^6.5.0",

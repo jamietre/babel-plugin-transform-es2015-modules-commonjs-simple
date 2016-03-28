@@ -30,7 +30,8 @@
 
 */
 
-var chai =      require('chai');
+var assert =    require('assert');
+var eol =       require('os').EOL;
 var fs =        require('fs');
 var path =      require('path');
 var _ =         require('lodash');
@@ -41,7 +42,8 @@ var babel =     require('babel-core');
 var codeFrame = require("babel-code-frame");
 
 var buildExternalHelpers = babel.buildExternalHelpers;
-var assert = chai.assert;
+
+
 var babelHelpers = eval(buildExternalHelpers(null, "var"));
 
 var PLUGIN_NAME = "transform-es2015-modules-commonjs-simple";
@@ -249,9 +251,14 @@ function asArray(obj) {
 */
 
 function normalizeEndings(text) {
-  text = text + "\n";
-  return text.replace(/\r\n/g, "\n")
-    .replace(/[\n]{2,}/g, "\n");
+  
+  text = text.replace(/\r\n/g, '\n');
+  text = text + '\n';
+
+  text = text.replace(/[\n]{2,}/g, '\n');
+  text = text.replace(/\n/g, eol);
+
+  return text;
 }
 
 // main entry
