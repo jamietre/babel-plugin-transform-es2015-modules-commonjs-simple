@@ -7,7 +7,7 @@ Use ES6 Module Format While Preserving Imported Symbol Names
 
 The regular *babel-plugin-transform-es2015-modules-commonjs* module mangles symbol names in order to implement the ES6 modules feature of exporting bindings rather than references or values.
 
-However, JavaScript source maps don't currently support mapping symbol names. So when debugging using source maps, any imports will not be available under their original name, which is can make for a frustrating experience. This module ensures that all symbol names are preserved. 
+However, JavaScript source maps don't currently support mapping symbol names. So when debugging using source maps, any imports will not be available under their original name, which can be a frustrating experience. This module ensures that all symbol names are preserved. 
 
 This module adds a `noMangle` option that, when true, prevents variable names from being mangled.
 
